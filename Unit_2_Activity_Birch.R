@@ -4,12 +4,9 @@
 ant_ice_loss <- read.table("data/antarctica_mass_200204_202111.txt", 
                           skip=31, sep="", header = FALSE,
                           col.names = c("decimal_date", "mass_Gt", "sigma_Gt")) 
-print(ant_ice_loss)
 grn_ice_loss <- read.table("data/greenland_mass_200204_202111.txt", 
                           skip=31, sep="", header = FALSE,
                           col.names = c("decimal_date", "mass_Gt", "sigma_Gt"))
-print(grn_ice_loss)
-
 library(tidyverse)
 bw <- theme_bw() + theme(panel.grid.major = element_blank(), 
                          panel.grid.minor = element_blank(),
@@ -57,30 +54,45 @@ grn_ice_loss$Lower_CI = c(grn_ice_loss$mass_Gt-2*grn_ice_loss$sigma_Gt)
 
 library(reshape2)
 aic <- melt(ant_ice_loss, na.rm = TRUE, id.vars = "decimal_date")
-print(aic)
-aicg <- ggplot(data = aic, mapping = aes(x = decimal_date, y = value, color = variable)) +
+ggplot(data = aic, mapping = aes(x = decimal_date, y = value, color = variable)) +
   geom_point() + 
   geom_smooth(se = F, method = lm) + bw  +
   labs(title = "Antarctic Ice Loss", x = "Date", y = "Mass(Gt)") +
   scale_color_manual(values = c("blue", "brown", "purple", "orange"))
 gic <- melt(grn_ice_loss, na.rm = TRUE, id.vars = "decimal_date")
-print(gic)
+ggplot(data = gic, mapping = aes(x = decimal_date, y = value, color = variable)) +
+  geom_point(show.legend = FALSE) + 
+  geom_smooth(se = F, method = lm, show.legend = FALSE) + bw  +
+  labs(title = "Greenland Ice Loss", x = "Date", y = "Mass(Gt)") +
+  scale_color_manual(values = c("blue", "brown", "purple", "orange"))
+aicg <- ggplot(data = aic, mapping = aes(x = decimal_date, y = value, color = variable)) +
+  geom_point() + 
+  geom_smooth(se = F, method = lm) + bw  +
+  labs(title = "Antarctic Ice Loss", x = "Date", y = "Mass(Gt)") +
+  scale_color_manual(values = c("blue", "brown", "purple", "orange"))
 gicg <- ggplot(data = gic, mapping = aes(x = decimal_date, y = value, color = variable)) +
   geom_point(show.legend = FALSE) + 
   geom_smooth(se = F, method = lm, show.legend = FALSE) + bw  +
   labs(title = "Greenland Ice Loss", x = "Date", y = "Mass(Gt)") +
   scale_color_manual(values = c("blue", "brown", "purple", "orange"))
+library(patchwork)
 gicg + aicg
 
 min(ant_ice_loss$mass_Gt)
 min(grn_ice_loss$mass_Gt)
-
 big_loss <- data.frame("Location" = c("Antarctica", "Greenland"),
                        Loss = c(min(ant_ice_loss$mass_Gt)*-1, min(grn_ice_loss$mass_Gt)*-1))
-
 ggplot(data = big_loss, aes(x = Location, y = Loss, fill = Location)) + 
   geom_bar(stat = "identity") + bw +
-  scale_color_manual(values = c("Brown", "Blue"))
+  scale_fill_manual(values = c("Brown", "Blue")) + labs(y = "Total Ice Loss (Gt)")
 
-        
-                       
+CIG <- (grn_ice_loss[[1 , 2]] - grn_ice_loss[[203 , 2]]) / 
+  (grn_ice_loss[[1 , 1]] - grn_ice_loss[[203 , 1]]) * -1
+CIA <- (ant_ice_loss[[1 , 2]] - ant_ice_loss[[203 , 2]]) / 
+  (ant_ice_loss[[1 , 1]] - ant_ice_loss[[203 , 1]]) * -1
+CII <- data.frame("Location" = c("Antarctica", "Greenland"),
+                  Ice_Loss_Rate = c(CIA, CIG))
+ggplot(data = CII, aes(x = Location, y = Ice_Loss_Rate, fill = Location)) + 
+  geom_bar(stat = "identity") + bw +
+  scale_fill_manual(values = c("Brown", "Blue")) + labs(title = "WE ARE LOSING ICE!",
+                                                        y = "Ice Loss Rate (Gt/yr)")
