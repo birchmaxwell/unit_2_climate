@@ -160,7 +160,7 @@ any(is.na(vec2))
 all(is.na(vec2))
 
 
-##### Activity Three, COnditional Logic #####
+##### Activity Three, Conditional Logic #####
 
 # IF, THEN statements... essentially
 
@@ -174,3 +174,213 @@ if(num < 0){print(" 2 is a negative??? ")
   num = num*-1
   print(" now is it positive ")
 } else{print("lol u fucked up")}
+
+
+a <- 70
+b <- 85
+if(a > b){
+  print("a won!")
+} else if(a < b){
+  print("b won")
+} else if(a == b){
+  print("twas a tie")
+}
+
+
+# ifelse()
+d <- 4
+final <- ifelse(d != 0, 1/d, NA)
+final
+
+e <- c(1,2,3,4,-5)
+final2 <- as.data.frame(ifelse(e != 0, 3/e, NA))
+final2
+
+##### Activity Four, Mauna Load and CO2 #####
+
+url <- 'ftp://aftp.cmdl.noaa.gov/products/trends/co2/co2_mm_mlo.txt'
+co2 <- read.table(url, col.names = c("year", "month", "decimal_date", 
+                                    "monthly_average", "deseasonalized", 
+                                    "n_days", "st_dev_days", "monthly_mean_uncertainty"))
+
+library(tidyverse)
+install.packages("ggpmisc")
+library(ggpmisc)
+my.formula <- y ~ x
+EqStat <- stat_poly_eq(formula = my.formula, aes(label = paste(..eq.label..,
+                                                               ..rr.label..,
+                                                               ..p.value.label..,
+                                                               sep = "~~~~")), 
+                       parse = TRUE, label.x = "left", label.y = "top")
+bw <- theme_bw() + theme(panel.grid.major = element_blank(), 
+                         panel.grid.minor = element_blank(),
+                         panel.background = element_blank())
+
+ggplot(data = co2, mapping = aes(x = decimal_date, y = monthly_average)) +
+  geom_point(aes(x = decimal_date, y = monthly_average), alpha = 1/3) + 
+  geom_smooth(se = T, color = "red") + bw + EqStat +
+  labs(title = "CO2 Increase", x = "Date", y = "CO2 (ppm)")
+
+co2$seasonal_cycle <- co2$monthly_average - co2$deseasonalized
+ggplot(data = co2, mapping = aes(x = decimal_date, y = seasonal_cycle)) +
+  geom_line(aes(x = decimal_date, y = seasonal_cycle)) + 
+  bw + labs(title = "Seasonal Trends", x = "Date", y = "CO2 Difference (ppm)") +
+  xlim(2015, 2021)
+
+a1 <- mean(co2$seasonal_cycle[co2$month == 1])
+a2 <- mean(co2$seasonal_cycle[co2$month == 2])
+a3 <- mean(co2$seasonal_cycle[co2$month == 3])
+a4 <- mean(co2$seasonal_cycle[co2$month == 4])
+a5 <- mean(co2$seasonal_cycle[co2$month == 5])
+a6 <- mean(co2$seasonal_cycle[co2$month == 6])    # Note how fucking annoying this is
+a7 <- mean(co2$seasonal_cycle[co2$month == 7])
+a8 <- mean(co2$seasonal_cycle[co2$month == 8])
+a9 <- mean(co2$seasonal_cycle[co2$month == 9])
+a10 <- mean(co2$seasonal_cycle[co2$month == 10])
+a11 <- mean(co2$seasonal_cycle[co2$month == 11])
+a12 <- mean(co2$seasonal_cycle[co2$month == 12])
+co2_mothly_cycle <- data.frame(month = c(1:12), detrended = c(a1,a2,a3,a4,
+                                                              a5,a6,a7,a8,
+                                                              a9,a10,a11,a12))
+ggplot(data = co2_mothly_cycle, mapping = aes(x = month, y = detrended)) +
+  geom_line(aes(x = month, y = detrended), alpha = 1) + 
+  bw + labs(title = "Seasonal Cycle", x = "Month", y = "CO2 (ppm)")
+    # NOW WE LEARN LOOPS SO WE DO NOT HAVE TO DO THAT CRAP ABOVE
+
+##### Activity Five FOR LOOPS #####
+for(i in c(1:4)){
+  print("one loop")
+}
+
+CMC_with_loop <- data.frame(month = c(1:12), detrended = for(i in (co2$seasonal_cycle[co2$month == i])){
+  mean(co2$seasonal_cycle[co2$month == i])
+}) # i tried IDK
+
+words = c("my", "second", "for", "loop")
+for(word in words){print(word)}                               
+
+# indexing with a loop
+my_vec <- c(1,3,4,5,3,1)
+n <- length(my_vec)
+my_vec_sq <- rep(NA, n)
+for(i in seq(n)){
+  my_vec_sq[1] = my_vec[i]^2
+}
+my_vec_sq
+
+# practice
+thing <- c(1:100)
+num <- length(thing)
+for(i in seq(thing)){
+  num[1] = factorial(thing[i])
+}
+
+# for loop
+vec3 <- c(1,3,5,7)
+total <- 0
+for(i in seq(length(vec3))){
+  total = total + vec3[i]
+  print(total)
+}
+# nested for loop, good for matrix !!!!!!!!!!!! #####
+mat <- matrix(c(2,5,6,3,2,4), nrow = 2, byrow = TRUE)
+mat_squared <- matrix(c(NA), nrow =2, ncol =3)
+for(i in c(1:2)){
+  for(j in c(1:3)){
+    mat_squared[i, j] = mat[i, j]^2      # can run this to look at the matrix "mat"
+  }
+  print(mat_squared)
+}
+
+for(i in seq(dim(mat)[1])){
+  for(j in seq(dim(mat)[2])){
+    mat_squared[i, j] = mat[i, j]^2      # can run this to look any matrix, use this for Tads HW
+  }
+  print(mat_squared)
+}
+
+
+# while loop, repeating a code (like a nested loop, but) based on a condition #####
+  # condition MUST at some point be false or else u get infinite loop!
+
+x <- 1
+while( x > 0){
+  x <- x + 1
+}            # infinite loop
+
+x # this is what the number became before we hit the STOP
+
+y <- -2
+while( x < 20){
+  y <- y + 6
+}
+y # amount of loops that ran before you reached your condition
+
+# fishing game
+rnorm(1, mean = 2, sd = 1)
+total_catch <- 0
+catch_limit <- 50
+n_fish <- 0
+while(total_catch < catch_limit){
+  n_fish <- n_fish + 1
+  fish_weight <- rnorm(1, mean = 2, sd =1)
+  total_catch <- total_catch + fish_weight
+  print(n_fish)
+}
+
+##### Activity Six, Arctic Sea Ice #####
+url = 'ftp://sidads.colorado.edu/DATASETS/NOAA/G02135/north/daily/data/N_seaice_extent_daily_v3.0.csv'
+arctic_ice = read.delim(url, skip=2, sep=",", header=FALSE, col.names = 
+                          c("Year", "Month", "Day", "Extent", "Missing", "Source_Data"))
+head(arctic_ice)
+tail(arctic_ice)
+library(lubridate)
+
+arctic_ice$date <- make_date(year = arctic_ice$Year, month = arctic_ice$Month, 
+                             day = arctic_ice$Day)
+head(arctic_ice)
+
+library(tidyverse)
+bw <- theme_bw() + theme(panel.grid.major = element_blank(), 
+                         panel.grid.minor = element_blank(),
+                         panel.background = element_blank())
+install.packages("ggpmisc")
+library(ggpmisc)
+my.formula <- y ~ x
+EqStat <- stat_poly_eq(formula = my.formula, aes(label = paste(..eq.label..,
+                                                               ..rr.label..,
+                                                               ..p.value.label..,
+                                                               sep = "~~~~")), 
+                       parse = TRUE, label.x = "right", label.y = "top")
+
+ggplot(data = arctic_ice, mapping = aes(x = date, y = Extent)) +
+  geom_point(aes(x = date, y = Extent), alpha = 1/3) + 
+  geom_line(color = "black") + bw + EqStat +
+  labs(title = "Ice Loss", x = "Date", y = "Mass(Gt)")
+
+arctic_ice_coverage <- data.frame(year <- seq(min(arctic_ice$Year) + 1, 
+                                              max(arctic_ice$Year) - 1),
+                                  extent_annual_avg <- NA,
+                                  extent_5yr_avg <- NA
+                                              )
+
+#check to see if what you want works
+head(arctic_ice_coverage)
+mean(arctic_ice$Extent[arctic_ice$Year == arctic_ice_coverage$year[1]])
+# then throw that bitch in there... this one is for single extent annual average
+for(i in seq(dim(arctic_ice_coverage)[1])){
+  arctic_ice_coverage$extent_annual_avg....NA[i] <- 
+    mean(arctic_ice$Extent[arctic_ice$Year == arctic_ice_coverage$year[i]])
+  print(arctic_ice_coverage)
+}
+# now for 5 yr average
+for(i in seq(dim(arctic_ice_coverage)[1])){
+  y <- seq(arctic_ice_coverage$year....seq.min.arctic_ice.Year....1..max.arctic_ice.Year....[i]- 2,
+           arctic_ice_coverage$year....seq.min.arctic_ice.Year....1..max.arctic_ice.Year....[i] + 2)
+  arctic_ice_coverage$extent_5yr_avg....NA <- mean(arctic_ice$Extent[arctic_ice$Year %in% y ==
+                                                                       arctic_ice_coverage$year[i]])
+  print(arctic_ice_coverage)
+}
+# im not doing the 5 year average. This syntax sucks and she should have define variables above
+# so code is not messy.
+##### Activity Seven, Functions #####
